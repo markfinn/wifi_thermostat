@@ -1,12 +1,3 @@
-Your NodeMCU custom build finished successfully. You may now download the firmware:
-- float: http://nodemcu-build.com/builds/nodemcu-master-16-modules-2016-01-01-22-25-11-float.bin
-- integer: http://nodemcu-build.com/builds/nodemcu-master-16-modules-2016-01-01-22-25-11-integer.bin
-
-This was built against the master branch and includes the following modules: node, file, gpio, wifi, net, i2c, tmr, uart, ow, bit, mqtt, u8g, crypto, dht, rtctime, enduser_setup.
-The files are guaranteed to be available for download for 24h.
-
-
-
 ���8�����b�c����l���b�n�n�$�l���>~�n���l`�#�n��{�;���lrp�n��p�<������>~�n���r�#�n��s��l`n���r�p��<�����r��#�n�r�;��ےn��r��lx~�n��ܒ�ğ#�n�����#ll����������c��l�c�$�`�9�����n��>`l��l��n't use rtc mem data
 ��9�d�
 Ai-Thinker Technology Co.,Ltd.

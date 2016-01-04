@@ -33,6 +33,9 @@ function setup()
     hysteresis=1
     
     timeouts={}
+
+    
+    
     timeoutUpdate("temp", 10)
 end
 
@@ -155,7 +158,7 @@ doScreen()
 tmr.alarm(0, 400, 1, doWdt) 
 tmr.alarm(1, 333, 1, doTemp) 
 tmr.alarm(2, 100, 1, function() if dispwstat ~= wifi.sta.status() or dispwstat == wifi.STA_CONNECTING then doScreen() end end ) 
-    
-wifi.sta.connect()
 
-
+--=adc.readvdd33()
+--wifi.sta.connect()
+--setpoint=100

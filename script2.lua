@@ -39,18 +39,32 @@ function setup()
     mq=mqtt.Client(devid, 30)
     mq:lwt(prefix.."lwt", "offline", 1, 0)
     mqstat=0
-    mqtmrdn=0
-    mqtmrup=0
+    mqtmrdn=-10000000
+    mqtmrup=-10000000
+
+    screenData={}
 
     timeoutUpdate("temp", 10)
+    timeoutUpdate("screen", 10)
+end
+
+function mqtttmrsetd() 
+  mqtmrdn=tmr.now()
+  dispUpdateNeeded=dispUpdateNeeded or not screenData.mqstatd 
+  screenData.mqstatd = true
+end
+function mqtttmrsetu() 
+  mqtmrup=tmr.now()
+  dispUpdateNeeded=dispUpdateNeeded or not screenData.mqstatu 
+  screenData.mqstatu = true
 end
 
 function mqttHandle(conn, topic, data) 
-  mqtmrdn=tmr.now()
   print(topic .. ":" ) 
   if data ~= nil then
     print(data)
   end
+  mqtttmrsetd() 
 end
 
 function doManageMqtt()
@@ -66,24 +80,26 @@ function doManageMqtt()
             mq:on("offline", function(con) 
                 mqstat=1 
                 mq:close()
+		dispUpdateNeeded=true
                 tmr.alarm(3, 2000, 1, doManageMqtt) 
             end)
             mq:on("message", mqttHandle)
             mqstat=2
-            mqtmrup=tmr.now()
+            mqtttmrsetu() 
             mq:connect("192.168.13.3", 1883, 0, function(conn) 
                 mqstat=3
-                mqtmrdn=tmr.now()
-                mqtmrup=tmr.now()
+                mqtttmrsetu() 
+                mqtttmrsetd() 
                 tmr.alarm(3, 2000, 1, doManageMqtt) 
                 mq:subscribe(prefix.."#",1, function(conn) 
                     mqstat=4
-                    mqtmrdn=tmr.now()
-                    mqtmrup=tmr.now()
+                    mqtttmrsetu() 
+                    mqtttmrsetd() 
                     tmr.alarm(3, 2000, 1, doManageMqtt) 
                     mq:subscribe("/IoTmanager",1, function(conn) 
                         mqstat=5
-                        mqtmrdn=tmr.now()
+                        mqtttmrsetd() 
+              		dispUpdateNeeded=true
                         tmr.alarm(3, 15000, 1, doManageMqtt) 
                     end) 
                 end) 
@@ -95,10 +111,6 @@ function doManageMqtt()
         end
     end
 end
---=mqstat
---=prefix
---tmr.stop(3)
---doManageMqtt()
 
 function timeoutUpdate(s, delay)
     timeouts[s]=tmr.now()/1000000+delay
@@ -116,6 +128,9 @@ function doTemp()
            relay(true)
          end
 
+         dispUpdateNeeded=dispUpdateNeeded or temp~= screenData.temp or humi~= screenData.humi 
+         screenData.temp = temp
+         screenData.humi = humi
          timeoutUpdate("temp", 10)
     end
 end
@@ -172,8 +187,8 @@ end
 function iconMqtt(x,y, stat, u, d)
 	if stat==5 then
 		disp:drawXBM(x, y-12, 12, 8, "\254\3\255\7\3\6\3\6\3\6\3\6\254\3\255\7")
-		-- fe03 011111111100
-		-- ff07 111111111110
+	-- fe03 011111111100
+	-- ff07 111111111110
         -- 0306 110000000110
         -- 0306 110000000110
         -- 0306 110000000110
@@ -197,11 +212,10 @@ end
 
 
 end
-
+here
 function doScreen()
-    tmr.stop(2)
-     local sp=convtemp(setpoint, fahrenheit).."\176"
-     local curr=convtemp(temperature, fahrenheit).."\176  "..convtemp(humidity).."%"
+     local sp=convtemp(screenData.setpoint, fahrenheit).."\176"
+     local curr=convtemp(screenData.temp, fahrenheit).."\176  "..convtemp(humidity).."%"
      disp:setFont(u8g.font_fub30)
      local spw = disp:getStrWidth(sp)
      disp:setFont(u8g.font_9x15)

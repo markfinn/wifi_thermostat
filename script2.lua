@@ -1,10 +1,10 @@
-dhtpin=4
+dhtpin=4 --gpio2
 
-sdapin = 7
-sclpin = 6
+sdapin = 6  --gpio12
+sclpin = 7 --gpio13
 dispaddr = 0x3c
 
-relaypin=8
+relaypin=8 --gpio15
 
 devid = "thermostat_"..node.chipid()
 prefix = "/IoTmanager/"..devid.."/"

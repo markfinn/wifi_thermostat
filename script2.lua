@@ -16,6 +16,7 @@ prefix = "/IoTmanager/"..devid.."/"
 
 function relay(state)
     gpio.write(relaypin, state and gpio.HIGH or gpio.LOW) 
+    dispUpdateNeeded=dispUpdateNeeded or state ~= screenData.relay
 end
 
 function convtemp(t, f)
@@ -112,7 +113,6 @@ function doManageMqtt()
             mq:on("offline", function(con) 
                 mqstat=1 
                 mq:close()
-		dispUpdateNeeded=true
                 tmr.alarm(3, 2000, 1, doManageMqtt) 
             end)
             mq:on("message", mqttHandle)
@@ -131,7 +131,6 @@ function doManageMqtt()
                     mq:subscribe("/IoTmanager",1, function(conn) 
                         mqstat=5
                         mqtttmrsetd() 
-              		dispUpdateNeeded=true
                         tmr.alarm(3, 15000, 1, doManageMqtt) 
                     end) 
                 end) 
@@ -142,6 +141,9 @@ function doManageMqtt()
             tmr.alarm(3, 2000, 1, doManageMqtt) 
         end
     end
+    
+    dispUpdateNeeded=dispUpdateNeeded or screenData.mqstat ~= mqstat
+    screenData.mqstat = mqstat
 end
 
 function timeoutUpdate(s, delay)
@@ -244,7 +246,7 @@ end
 
 
 end
-here
+
 function doScreen()
      local sp=convtemp(screenData.setpoint, fahrenheit).."\176"
      local curr=convtemp(screenData.temp, fahrenheit).."\176  "..convtemp(humidity).."%"
@@ -259,17 +261,14 @@ function doScreen()
          disp:drawStr((disp:getWidth()-currw)/2, 10, curr)
          disp:setFont(u8g.font_fub30)
          disp:drawStr((disp:getWidth()-spw)/2, 50, sp)
-         if gpio.read(relaypin)~=0 then
+         if screenData.relay then
            iconHeat(0,disp:getHeight())
          end
-         dispwstat = wifi.sta.status()
-         iconWifi(disp:getWidth()-12,disp:getHeight(), dispwstat)
-         dispmqstat = mqstat
-         iconMqtt(disp:getWidth()-12-12,disp:getHeight(), dispmqstat, mqstatu, mqstatd)
+         iconWifi(disp:getWidth()-12,disp:getHeight(), screenData.wstat)
+         iconMqtt(disp:getWidth()-12-12,disp:getHeight(), screenData.mqstat, screenData.mqstatu, screenData.mqstatd)
 
     until disp:nextPage() == false
      timeoutUpdate("screen", 10)
-     disptime=tmr.now()
 end
 
 
@@ -288,30 +287,19 @@ function doWdt()
 end
 
 setup()
+
 doScreen()
+
 tmr.alarm(0, 400, 1, doWdt) 
 tmr.alarm(1, 1000, 1, doTemp) 
 tmr.alarm(2, 100, 1, function() 
-	newmqstatd = tmr.now() - mqtmrdn < 1000000
-	newmqstatu = tmr.now() - mqtmrup < 1000000
-	if tmr.now() - disptime > 1000000
-	or disptemp ~= temp
-    or disphumidity ~= humidity
-    or dispsetpoint ~= setpoint
-	or dispwstat ~= wifi.sta.status() 
-	or dispwstat == wifi.STA_CONNECTING
-	or dispmqstat ~= mqstat
-	or newmqstatd ~= mqstatd  
-	or newmqstatu ~= mqstatu  
+	if dispUpdateNeeded or tmr.now() - disptime > 1000000
 	then 
-        print("here")
-		mqstatd = newmqstatd  
-		mqstatu = newmqstatu  
-        disptemp = temp
-        disphumidity = humidity
-        dispsetpoint = setpoint
+        print("updatescreen")
 		doScreen() 
-	end 
+        dispUpdateNeeded = false
+        disptime = tmr.now()
+    end 
 end ) 
 tmr.alarm(3, 1000, 1, doManageMqtt) 
 

@@ -1,6 +1,6 @@
 function startup2()
     print('main startup.')
-    require('script2')
+    require('app')
     end
 
 function startup1()

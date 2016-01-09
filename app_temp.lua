@@ -12,8 +12,10 @@ function convtemp(t, f)
      return string.format("%3d", t+.5)
 end
 
-function setsetpoint(t)
-           setpoint=t
+function setsetpoint(s)
+         s = s > 0 and s or 0
+         s = s < 35 and s or 35
+         setpoint=s
          dispUpdateNeeded=dispUpdateNeeded or setpoint~= screenData.setpoint 
          screenData.setpoint = setpoint
 end

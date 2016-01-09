@@ -13,8 +13,12 @@ relaypin=8 --gpio15
 require("app_setup")
 require("app_temp")
 require("app_disp")
+require("app_enc")
 require("app_mqtt")
 require("app_other")
+
+settings={onsetpoint=20,offsetpoint=5}
+setsetpoint(settings.onsetpoint)
 
 --node.compile("app_disp.lua")
 --node.compile("app_other.lua")

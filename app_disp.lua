@@ -77,7 +77,7 @@ end
 end
 
 function doScreen()
-     local sp=convtemp(screenData.setpoint).."\176"
+     local sp=convtemp(screenData.setpoint, fahrenheit).."\176"
      local curr=screenData.curtemp or ""
      disp:setFont(u8g.font_fub30)
      local spw = disp:getStrWidth(sp)

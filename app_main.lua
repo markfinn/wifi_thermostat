@@ -1,10 +1,9 @@
 
 
-function setup()
     screenData={}
 
     gpio.mode(relaypin, gpio.OUTPUT)
-    relay(false)
+    gpio.write(relaypin, gpio.LOW)
 do
     local encastate
     local encbstate
@@ -36,44 +35,13 @@ end
     disp = u8g.ssd1306_128x64_i2c(dispaddr)
 
     fahrenheit=true
-    setsetpoint((70-32)/9*5)
+    setpoint=nil
     hysteresis=1
     
-    timeouts={}
 
-    mq=mqtt.Client(devid, 30)
-    mq:lwt(prefix.."lwt", "offline", 1, 0)
-    mqstat=0
-    mqtmrdn=-10000000
-    mqtmrup=-10000000
+ dispUpdateNeeded=true
 
 
-    timeoutUpdate("temp", 10)
-    timeoutUpdate("screen", 10)
-end
-
-
-function timeoutUpdate(s, delay)
-    timeouts[s]=tmr.now()/1000000+delay
-end
-
-
-setup()
-
-doScreen()
-
-tmr.alarm(0, 400, 1, doWdt) 
-tmr.alarm(1, 1000, 1, doTemp) 
-tmr.alarm(2, 100, 1, function() 
-	if dispUpdateNeeded or tmr.now() - disptime > 3100000
-	then 
-        print("updatescreen"..tmr.now())
-		doScreen() 
-        dispUpdateNeeded = false
-        disptime = tmr.now()
-    end 
-end ) 
-tmr.alarm(3, 1000, 1, doManageMqtt) 
 
 
 --=adc.readvdd33()

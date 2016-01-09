@@ -25,7 +25,7 @@ function doTemp()
          temperature=temp
          humidity=humi
 
-         if gpio.read(relaypin)==1 and temp > setpoint+hysteresis then
+         if setpoint==nil or gpio.read(relaypin)==1 and temp > setpoint+hysteresis then
            relay(false)
          elseif gpio.read(relaypin)==0 and temp < setpoint-hysteresis then
            relay(true)
@@ -38,6 +38,8 @@ function doTemp()
          timeoutUpdate("temp", 10)
     end
 end
+
+tmr.alarm(1, 1000, 1, doTemp) 
 
 
 function doWdt()
@@ -54,3 +56,12 @@ function doWdt()
       tmr.wdclr()
 end
 
+function timeoutUpdate(s, delay)
+    timeouts[s]=tmr.now()/1000000+delay
+end
+
+    timeouts={}
+    timeoutUpdate("temp", 10)
+    timeoutUpdate("screen", 10)
+
+tmr.alarm(0, 400, 1, doWdt) 

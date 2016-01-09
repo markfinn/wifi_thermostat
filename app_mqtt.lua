@@ -1,6 +1,12 @@
 devid = "thermostat_"..node.chipid()
 prefix = "/IoTmanager/"..devid.."/"
 
+mq=mqtt.Client(devid, 30)
+mq:lwt(prefix.."lwt", "offline", 1, 0)
+mqstat=0
+mqtmrdn=-10000000
+mqtmrup=-10000000
+
 
 function mqtttmrsetd() 
   mqtmrdn=tmr.now()
@@ -67,3 +73,4 @@ function doManageMqtt()
     screenData.mqstat = mqstat
 end
 
+tmr.alarm(3, 1000, 1, doManageMqtt) 

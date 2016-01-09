@@ -100,4 +100,12 @@ function doScreen()
      timeoutUpdate("screen", 10)
 end
 
+tmr.alarm(2, 100, 1, function() 
+    if dispUpdateNeeded or tmr.now() - disptime > 3100000
+    then 
+        doScreen() 
+        dispUpdateNeeded = false
+        disptime = tmr.now()
+    end 
+end ) 
 

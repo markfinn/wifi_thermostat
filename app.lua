@@ -10,10 +10,10 @@ dispaddr = 0x3c
 
 relaypin=8 --gpio15
 
+require("app_main")
 require("app_disp")
 require("app_other")
 require("app_mqtt")
-require("app_main")
 
 --node.compile("app_disp.lua")
 --node.compile("app_other.lua")

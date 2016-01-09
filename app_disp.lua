@@ -66,10 +66,10 @@ function iconMqtt(x,y, stat, u, d)
     -- 1f 11111 0001000
     end
     if d then
-        disp:drawXBM(x+5, y-12+8, 7, 3, "\227\192\128")
-    -- e3 00100 0111110
-    -- c0 01110 0011100
-    -- 80 11111 0001000
+        disp:drawXBM(x+5, y-12+8, 7, 3, "\62\28\8")
+    -- 3e 00100 0111110
+    -- 1c 01110 0011100
+    -- 08 11111 0001000
     end
 end
 
@@ -100,7 +100,18 @@ function doScreen()
      timeoutUpdate("screen", 10)
 end
 
-tmr.alarm(2, 100, 1, function() 
+tmr.alarm(2, 100, 1, function()
+    local nwstat = wifi.sta.status()
+    dispUpdateNeeded=dispUpdateNeeded or nwstat ~= screenData.wstat 
+    screenData.wstat = nwstat
+
+  local xd=tmr.now() - mqtmrdn < 2000000
+  local xu=tmr.now() - mqtmrup < 2000000
+  dispUpdateNeeded=dispUpdateNeeded or xd ~= screenData.mqstatd or xu ~= screenData.mqstatu 
+  screenData.mqstatd = xd
+  screenData.mqstatu = xu
+
+    
     if dispUpdateNeeded or tmr.now() - disptime > 3100000
     then 
         doScreen() 

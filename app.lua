@@ -12,8 +12,9 @@ relaypin=8 --gpio15
 
 require("app_setup")
 require("app_disp")
-require("app_other")
+require("app_temp")
 require("app_mqtt")
+require("app_other")
 
 --node.compile("app_disp.lua")
 --node.compile("app_other.lua")

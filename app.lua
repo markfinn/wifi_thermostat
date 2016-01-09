@@ -11,8 +11,8 @@ dispaddr = 0x3c
 relaypin=8 --gpio15
 
 require("app_setup")
-require("app_disp")
 require("app_temp")
+require("app_disp")
 require("app_mqtt")
 require("app_other")
 

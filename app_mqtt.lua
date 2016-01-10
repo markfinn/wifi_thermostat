@@ -18,14 +18,52 @@ function mqtttmrsetu()
   dispUpdateNeeded=dispUpdateNeeded or not screenData.mqstatu 
   screenData.mqstatu = true
 end
-
+iotpushids={}
 function mqttHandle(conn, topic, data) 
-  print(topic .. ":" ) 
-  if data ~= nil then
-    print(data)
-  end
   mqtttmrsetd() 
+  if topic=="/IoTmanager" and data=="HELLO" then
+    mqpubiotman()
+  elseif topic=="/IoTmanager/ids" then
+    table.insert({tmr.now(), data})
+  else
+    s,l,v=string.find(topic, "/IoTmanager/thermostat_1190654/".."([^/]+)/control")
+    if s then
+       if v=="setpoint" then pcall(function() setsetpoint(tonumber(data)/1024*35) end) end
+    end
+  end
 end
+
+function mqpubstat(which, value)
+    pcall(function() mq:publish(prefix..which.."/status", '{"status":"'..value..'"}',1,0) end)
+end
+
+function mqpubiotman()
+    mq:publish("/IoTmanager", devid,1,0)
+
+    mq:publish(prefix.."config",cjson.encode({
+    id="0",
+    page="markpage",
+    descr="setpoint",
+    widget="range",
+    topic=prefix.."setpoint",
+    badge="badge-calm",
+    color="red"}),1,0)
+
+    mq:publish(prefix.."config",cjson.encode({
+    id="1",
+    page="markpage",
+    descr="temperature",
+    widget="small-badge",
+    topic=prefix.."temperature"}),1,0)
+
+    mq:publish(prefix.."config",cjson.encode({
+    id="2",
+    page="markpage",
+    descr="humidity",
+    widget="small-badge",
+    topic=prefix.."humidity"}),1,0)
+end
+
 
 function doManageMqtt()
 
@@ -58,8 +96,9 @@ function doManageMqtt()
                     mq:subscribe("/IoTmanager",1, function(conn) 
                         mqstat=5
                         mqtttmrsetd() 
+                        mqpubiotman()
                         tmr.alarm(3, 15000, 1, doManageMqtt) 
-                    end) 
+                        end) 
                 end) 
             end)
         end) then

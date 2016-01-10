@@ -12,7 +12,8 @@ relaypin=8 --gpio15
 
 require("app_setup")
 require("app_temp")
-require("app_mqtt")
+--require("app_mqtt")
+function mqpubstat() end mqtmrdn=-10000000 mqtmrup=-10000000
 require("app_disp")
 require("app_enc")
 require("app_other")

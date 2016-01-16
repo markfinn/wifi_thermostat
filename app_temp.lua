@@ -13,7 +13,7 @@ function convtemp(t, f)
 end
 
 function setsetpoint(s)
-         s = s > 0 and s or 0
+         s = s > -100 and s or -100
          s = s < 35 and s or 35
          setpoint=s
          dispUpdateNeeded=dispUpdateNeeded or setpoint~= screenData.setpoint 

@@ -19,7 +19,7 @@ require("app_enc")
 require("app_other")
 
 settings={onsetpoint=20,offsetpoint=5}
-setsetpoint(settings.onsetpoint)
+setsetpoint(settings.offsetpoint)
 
 --node.compile("app_disp.lua")
 --node.compile("app_other.lua")

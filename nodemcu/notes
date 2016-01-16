@@ -1,3 +1,3 @@
-nodemcu-master-19-modules-2016-01-03-05-32-00
-node, file, gpio, wifi, net, i2c, tmr, adc, uart, ow, mqtt, u8g, cjson, crypto, dht, rtcmem, rtctime, sntp, enduser_setup.
+dev-20-modules-2016-01-16-16-45-03
+node, file, gpio, wifi, net, i2c, tmr, adc, uart, ow, mqtt, u8g, cjson, crypto, dht, rtcmem, rtctime, rtcfifo, sntp, enduser_setup, ssl.
 font_5x7,font_6x10,font_9x15B,font_9x15,font_fur30,font_fub30

@@ -48,7 +48,7 @@ else
 end
 
 function iconMqtt(x,y, stat, u, d)
-	if stat==5 then
+	if stat then
 		disp:drawXBM(x, y-12, 12, 8, "\254\3\255\7\3\6\3\6\3\6\3\6\254\3\255\7")
 	-- fe03 011111111100
 	-- ff07 111111111110
@@ -100,7 +100,8 @@ function doScreen()
      timeoutUpdate("screen", 10)
 end
 
-tmr.alarm(2, 100, 1, function()
+
+function maybedisp()
     local nwstat = wifi.sta.status()
     dispUpdateNeeded=dispUpdateNeeded or nwstat ~= screenData.wstat 
     screenData.wstat = nwstat
@@ -119,4 +120,6 @@ tmr.alarm(2, 100, 1, function()
         disptime = tmr.now()
     end 
 end ) 
+
+tmr.alarm(2, 100, 1, maybedisp)
 

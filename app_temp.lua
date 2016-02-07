@@ -1,6 +1,7 @@
 function relay(state)
     gpio.write(relaypin, state and gpio.HIGH or gpio.LOW) 
     dispUpdateNeeded=dispUpdateNeeded or state ~= screenData.relay
+    screenData.relay = state
 end
 
 function convtemp(t, f)
@@ -40,8 +41,9 @@ function doTemp()
          timeoutUpdate("temp", 10)
          mqpubstat("temperature", temp)
          mqpubstat("humidity", humi)
+         mqpubstat("setpoint", setpoint/35*1024)
     end
 end
 
-tmr.alarm(1, 1000, 1, doTemp) 
+tmr.alarm(1, 2000, 1, doTemp) 
 

@@ -36,4 +36,13 @@ function telnetserver(cb)
         print("Welcome to NodeMcu world.")
     end)
 end
+--tmr.stop(6)
+--tmr.alarm(6, 60000, 1, function()
+--print(math.floor(tmr.now()/1000000), temperature, humidity, setpoint)
+--end)
+--require("app")
+--node.compile("telnet.lua")
+--=node.heap()
+--setsetpoint(-40)
+--node.restart()
 

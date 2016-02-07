@@ -1,9 +1,6 @@
 devid = "thermostat_"..node.chipid()
 prefix = "/IoTmanager/"..devid.."/"
 
-mq=mqtt.Client(devid, 30)
-mq:lwt(prefix.."lwt", "offline", 1, 0)
-mqstat=0
 mqtmrdn=-10000000
 mqtmrup=-10000000
 
@@ -18,13 +15,48 @@ function mqtttmrsetu()
   dispUpdateNeeded=dispUpdateNeeded or not screenData.mqstatu 
   screenData.mqstatu = true
 end
+
+mqpub=nil
+function mqttPublish(t,m)
+	function mqttPublisher(c)
+		if not mqpub or #mqpub==0 then
+		  mqpub=nil
+
+		  return
+			end
+
+--      v = table.remove(mqpub,1)
+	--    t,m=unpack(v)
+    --  print('send',t,m)
+	  --  mq:publish(t,m,1,0,mqttPublisher)
+	    mq:publish('/republisher/in',cjson.encode(mqpub),1,0,mqttPublisher)
+      tmr.alarm(6, 2000, 0,mqttPublisher)
+      mqpub={}
+	end
+
+  if not screenData.mqstat then return end
+  if mqpub and #mqpub > 10 then return end
+
+  if not mqpub then
+    mqpub={{t,m}}
+		mqttPublisher(mq)
+  else
+    table.insert(mqpub, {t,m})
+	end
+end
+
 iotpushids={}
 function mqttHandle(conn, topic, data) 
   mqtttmrsetd() 
   if topic=="/IoTmanager" and data=="HELLO" then
-    mqpubiotman()
+		mqttPublish("/IoTmanager", devid)
+    tmr.alarm(3, 1000, 0, doMqttPubConfig) 
   elseif topic=="/IoTmanager/ids" then
-    table.insert({tmr.now(), data})
+    n=tmr.now()
+    iotpushids[n]=data
+    for time,which in pairs(iotpushids) do 
+        if n-time > 120000000 then iotpushids[n]=nil end
+    end
   else
     s,l,v=string.find(topic, "/IoTmanager/thermostat_1190654/".."([^/]+)/control")
     if s then
@@ -34,82 +66,74 @@ function mqttHandle(conn, topic, data)
 end
 
 function mqpubstat(which, value)
-    pcall(function() mq:publish(prefix..which.."/status", '{"status":"'..value..'"}',1,0) end)
+    mqttPublish(prefix..which.."/status", '{"status":"'..value..'"}')
 end
 
-function mqpubiotman()
-    mq:publish("/IoTmanager", devid,1,0)
-
-    mq:publish(prefix.."config",cjson.encode({
+function doMqttPubConfig()
+    mqttPublish(prefix.."config",cjson.encode({
     id="0",
     page="markpage",
     descr="setpoint",
     widget="range",
     topic=prefix.."setpoint",
     badge="badge-calm",
-    color="red"}),1,0)
+    color="red"}))
 
-    mq:publish(prefix.."config",cjson.encode({
+    mqttPublish(prefix.."config",cjson.encode({
     id="1",
     page="markpage",
     descr="temperature",
     widget="small-badge",
-    topic=prefix.."temperature"}),1,0)
+    topic=prefix.."temperature"}))
 
-    mq:publish(prefix.."config",cjson.encode({
+    mqttPublish(prefix.."config",cjson.encode({
     id="2",
     page="markpage",
     descr="humidity",
     widget="small-badge",
-    topic=prefix.."humidity"}),1,0)
+    topic=prefix.."humidity"}))
 end
 
 
-function doManageMqtt()
+function doMqttStart()
+    dispUpdateNeeded=dispUpdateNeeded or screenData.mqstat
+    screenData.mqstat = false
+    mqpub=nil
+    if wifi.sta.status() ~= wifi.STA_GOTIP then
+        tmr.alarm(3, 1000, 0, doMqttStart) 
+        return
+    end
+mq=mqtt.Client(devid, 30)
+mq:lwt(prefix.."lwt", "offline", 1, 0)
+    mq:on("offline", function(con) 
+        dispUpdateNeeded=dispUpdateNeeded or screenData.mqstat
+        screenData.mqstat = false
+        tmr.alarm(3, 5000, 0, doMqttStart) 
+    end)
 
-    if mqstat~=5 and wifi.sta.status() == wifi.STA_GOTIP then
-        if not pcall(function()
-            if mqstat > 1 then
-                mq:close()
-                mqstat=1
-                tmr.alarm(3, 2000, 1, doManageMqtt) 
-                return
-            end
-            mq:on("offline", function(con) 
-                mqstat=1 
-                mq:close()
-                tmr.alarm(3, 2000, 1, doManageMqtt) 
-            end)
-            mq:on("message", mqttHandle)
-            mqstat=2
+    mq:on("message", mqttHandle)
+
+    mqtttmrsetu() 
+    mq:connect("192.168.13.3", 1883, 0, function(conn) 
+        tmr.alarm(3, 5000, 0, doMqttStart) 
+        mqtttmrsetd() 
+        mq:subscribe(prefix.."#",1, function(conn) 
             mqtttmrsetu() 
-            mq:connect("192.168.13.3", 1883, 0, function(conn) 
-                mqstat=3
+            mqtttmrsetd() 
+            tmr.alarm(3, 5000, 0, doMqttStart) 
+            mq:subscribe("/IoTmanager",1, function(conn) 
                 mqtttmrsetu() 
                 mqtttmrsetd() 
-                tmr.alarm(3, 2000, 1, doManageMqtt) 
-                mq:subscribe(prefix.."#",1, function(conn) 
-                    mqstat=4
-                    mqtttmrsetu() 
-                    mqtttmrsetd() 
-                    tmr.alarm(3, 2000, 1, doManageMqtt) 
-                    mq:subscribe("/IoTmanager",1, function(conn) 
-                        mqstat=5
-                        mqtttmrsetd() 
-                        mqpubiotman()
-                        tmr.alarm(3, 15000, 1, doManageMqtt) 
-                        end) 
+                mqpub=nil
+                dispUpdateNeeded=dispUpdateNeeded or not screenData.mqstat
+                screenData.mqstat = true
+                mqttPublish("/IoTmanager", devid)
+                tmr.alarm(3, 1000, 0, doMqttPubConfig) 
                 end) 
-            end)
-        end) then
-            mqstat=1 
-            mq:close()
-            tmr.alarm(3, 2000, 1, doManageMqtt) 
-        end
-    end
-    
-    dispUpdateNeeded=dispUpdateNeeded or screenData.mqstat ~= mqstat
-    screenData.mqstat = mqstat
+            end) 
+        end)
+    tmr.alarm(3, 5000, 0, function()     mq:close() tmr.alarm(3, 2000, 0, doMqttStart) end) 
 end
 
-tmr.alarm(3, 1000, 1, doManageMqtt) 
+tmr.alarm(3, 1000, 0, doMqttStart) 
+

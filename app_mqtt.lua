@@ -29,8 +29,8 @@ function mqttPublish(t,m)
 	--    t,m=unpack(v)
     --  print('send',t,m)
 	  --  mq:publish(t,m,1,0,mqttPublisher)
-	    mq:publish('/republisher/in',cjson.encode(mqpub),1,0,mqttPublisher)
-      tmr.alarm(6, 2000, 0,mqttPublisher)
+	    mq:publish('/republisher/in',cjson.encode(mqpub),1,0,function() tmr.stop(6) mqttPublisher() end )
+      tmr.alarm(6, 4000, 0,function () mq:close() end)
       mqpub={}
 	end
 

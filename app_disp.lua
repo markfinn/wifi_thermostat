@@ -119,7 +119,7 @@ function maybedisp()
         dispUpdateNeeded = false
         disptime = tmr.now()
     end 
-end ) 
+end 
 
 tmr.alarm(2, 100, 1, maybedisp)
 

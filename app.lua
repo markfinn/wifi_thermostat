@@ -1,7 +1,7 @@
 function runapp()
-dhtpin=3 --gpio0
+dhtpin=4 --gpio2
 
-encsw=4 --gpio2
+encsw=3 --gpio0
 encqa=2 --gpio4
 encqb=1 --gpio5
 

@@ -19,7 +19,7 @@ function setsetpoint(s)
          setpoint=s
          dispUpdateNeeded=dispUpdateNeeded or setpoint~= screenData.setpoint 
          screenData.setpoint = setpoint
-         mqpubstat("setpoint", setpoint/35*1024)
+         mqpubstat("setpoint", setpoint)
 end
 
 function doTemp()
@@ -41,7 +41,7 @@ function doTemp()
          timeoutUpdate("temp", 10)
          mqpubstat("temperature", temp)
          mqpubstat("humidity", humi)
-         mqpubstat("setpoint", setpoint/35*1024)
+         mqpubstat("setpoint", setpoint)
     end
 end
 

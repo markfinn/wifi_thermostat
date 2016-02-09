@@ -32,7 +32,7 @@ function mqttPublish(t,m)
 	    if mq:publish('/republisher/in',cjson.encode(mqpub),1,0, function () tmr.stop(6) mqttPublisher() end) then
 	      mqpub={}
   		end
-		  tmr.alarm(6,3000,0,mqttPublisher)
+		  tmr.alarm(6,10000,0,function () mq:close() tmr.alarm(6,1000,0,function () mq:connect("192.168.13.3", 1883, true, true) end) end)
 	end
 
   if not screenData.mqstat then return end

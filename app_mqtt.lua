@@ -29,9 +29,10 @@ function mqttPublish(t,m)
 	--    t,m=unpack(v)
     --  print('send',t,m)
 	  --  mq:publish(t,m,1,0,mqttPublisher)
-	    mq:publish('/republisher/in',cjson.encode(mqpub),1,0,function() tmr.stop(6) mqttPublisher() end )
-      tmr.alarm(6, 4000, 0,function () mq:close() end)
-      mqpub={}
+	    if mq:publish('/republisher/in',cjson.encode(mqpub),1,0, function () tmr.stop(6) mqttPublisher() end) then
+	      mqpub={}
+  		end
+		  tmr.alarm(6,3000,0,mqttPublisher)
 	end
 
   if not screenData.mqstat then return end
@@ -55,7 +56,10 @@ function mqttHandle(conn, topic, data)
 end
 
 function mqpubstat(which, value)
-    mqttPublish(prefix..which.."/status", '{"status":"'..value..'"}')
+	  local a,b,t
+		a,b=rtctime.get()
+		t=a+b/1000000  
+    mqttPublish(prefix..which.."/status", '{"status":"'..value..'","time":"'..t..'"}')
 end
 
 
@@ -73,14 +77,11 @@ mq:lwt(prefix.."lwt", "offline", 1, 0)
     mq:on("offline", function(con) 
         dispUpdateNeeded=dispUpdateNeeded or screenData.mqstat
         screenData.mqstat = false
-        tmr.alarm(3, 5000, 0, doMqttStart) 
     end)
 
     mq:on("message", mqttHandle)
 
-    mqtttmrsetu() 
-    mq:connect("192.168.13.3", 1883, 0, function(conn) 
-        tmr.alarm(3, 5000, 0, doMqttStart) 
+    mq:on("connect", function(con) 
         mqtttmrsetd() 
         mq:subscribe(prefix.."#",1, function(conn) 
             mqtttmrsetu() 
@@ -89,9 +90,11 @@ mq:lwt(prefix.."lwt", "offline", 1, 0)
             dispUpdateNeeded=dispUpdateNeeded or not screenData.mqstat
             screenData.mqstat = true
             end) 
-        end)
-    tmr.alarm(3, 5000, 0, function()     mq:close() tmr.alarm(3, 2000, 0, doMqttStart) end) 
+    end)
+
+    mqtttmrsetu() 
+    mq:connect("192.168.13.3", 1883, true, true)
 end
 
-tmr.alarm(3, 1000, 0, doMqttStart) 
+doMqttStart() 
 

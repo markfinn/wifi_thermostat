@@ -5,9 +5,8 @@ LUA = app_disp.lua  app_mqtt.lua   app_temp.lua \
 UPLOADS = $(LUA:.lua=.lua.uploaded)
 
 all: $(UPLOADS)
-	make restart
 
-%.uploaded: % restartandstop
+%.uploaded: %
 	nodemcu-uploader/nodemcu-uploader.py --port /dev/ttyUSB0 --baud 9600 upload -f $<
 	touch $@
 

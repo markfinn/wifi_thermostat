@@ -41,15 +41,14 @@ node.compile("app_other.lua")
 rtcmem.write32(30,0,0,0,0,0,0,0)
 end
 
---strip all the iotmanager stuff out.  should lower mem footprint
+--mqtt doer
+--provisioning. continue mine, or use http module that has no file support?
+--spif 0x6B000 0x7c000 -cf file.bin https://github.com/DiUS/spiffsimg
+--get off republisher. use publish return code
+--build iotmanager config server / republisher
 --runapp should set install=nil
 --read setpoint(plus crc or something) from rtcmem
---timer in publish shouldn't need to be there. fix mqtt.
 --I thnk I'm losing network because the display is so slow. display loop should be a callback and the loo should call system as needed, first and next should not be in user code.
---mqtt publish queue needs len and size exposed
---mqtt needs to publish faster than once a sec
 --encoder module
---something might be leaking memory. having hard time finding when it disapears becasue of hoe each of my files defines and runs stuff. separate define from run
---looks like mqtt uses a ton of mem.  that internal queue?
 
 

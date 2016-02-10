@@ -28,5 +28,7 @@ restartandstop:
 terminal:
 	screen /dev/ttyUSB0 9600
 
-flashnode: 
+flashnodedownloaded: 
 	esptool/esptool.py  --port /dev/ttyUSB0 --baud 115200 write_flash 0 nodemcu/nodemcu-float.bin  --flash_mode dio --flash_size 8m
+flashnodebuilt: 
+	esptool/esptool.py  --port /dev/ttyUSB0 --baud 115200 write_flash 0x00000 nodemcu/0x00000.bin  0x10000 nodemcu/0x10000.bin --flash_mode dio --flash_size 8m

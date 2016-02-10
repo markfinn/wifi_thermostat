@@ -7,8 +7,7 @@ UPLOADS = $(LUA:.lua=.lua.uploaded)
 all: $(UPLOADS)
 
 %.uploaded: %
-	nodemcu-uploader/nodemcu-uploader.py --port /dev/ttyUSB0 --baud 9600 upload -f $<
-	touch $@
+	nodemcu-uploader/nodemcu-uploader.py --port /dev/ttyUSB0 --baud 9600 upload -f $< && touch $@
 
 loadfw: $(LUA)
 	nodemcu-uploader/nodemcu-uploader.py --port /dev/ttyUSB0 --baud 9600 file restartandstop ;\

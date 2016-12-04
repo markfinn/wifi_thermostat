@@ -1,8 +1,9 @@
 downloaded:
 
-dev-20-modules-2016-02-07-22-23-49
+
+master 12/4/2016
 node, file, gpio, wifi, net, i2c, tmr, adc, uart, ow, mqtt, u8g, cjson, crypto, dht, rtcmem, rtctime, rtcfifo, sntp, enduser_setup
-ssl.
+ssl, rotary.
 font_5x7,font_6x10,font_9x15B,font_9x15,font_fur30,font_fub30
 
 

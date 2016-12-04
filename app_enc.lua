@@ -1,40 +1,29 @@
 do
-    local encastate
-    local encbstate
-    local encpos=0
-    local function enccb(cw)
-       local oldpos = encpos
-       encpos = encpos + (cw and 1 or -1)
-       if math.floor(oldpos/4)~=math.floor(encpos/4) then
-         local d=encpos > oldpos and 1 or -1
+    pos, press, queue = rotary.getpos(0)
+    local oldpos = pos
+    local function enccb(type, pos, when)
+       move = math.floor(oldpos/4) - math.floor(pos/4) 
+       if move~=0 then
+         oldpos=pos
          local s
          if fahrenheit then
-            s=math.floor(setpoint*9/5 + d +.5)*5/9
+            s=math.floor(setpoint*9/5 + move +.5)*5/9
          else
-            s=(math.floor(setpoint + .5)*2 +.5)/2
+            s=(math.floor(setpoint + move + .5)*2 +.5)/2
          end
          setsetpoint(s)
        end
     end
 
-    function enccbsw(pushed)
+    function enccbsw(type, pos, when)
        if pushed then
          s = setpoint == settings.offsetpoint and settings.onsetpoint or settings.offsetpoint
          setsetpoint(s)
        end
     end
 
-    local function xor(a,b)
-    if a and b or not a and not b then return false end
-    return true
-    end
-    
-    gpio.mode(encsw, gpio.INT, gpio.PULLUP)
-    gpio.trig(encsw, "both", function(level) enccbsw(level==0) end)
-    gpio.mode(encqa, gpio.INT, gpio.PULLUP)
-    gpio.trig(encqa, "both", function(level) level=gpio.read(encqa)==0 enccb(xor(level, encbstate)) encastate=level end) --level doesnt seem to work
-    gpio.mode(encqb, gpio.INT, gpio.PULLUP)
-    gpio.trig(encqb, "both", function(level) level=gpio.read(encqb)==0 enccb(not xor(encastate, level)) encbstate=level end) --level doesnt seem to work
-    encastate = gpio.read(encqa)==0
-    encbstate = gpio.read(encqb)==0
+    rotary.on(0, rotary.CLICK, enccbsw)
+    rotary.on(0, rotary.TURN, enccb)
 end
+
+

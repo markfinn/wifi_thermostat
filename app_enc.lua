@@ -16,10 +16,8 @@ do
     end
 
     function enccbsw(type, pos, when)
-       if pushed then
          s = setpoint == settings.offsetpoint and settings.onsetpoint or settings.offsetpoint
          setsetpoint(s)
-       end
     end
 
     rotary.on(0, rotary.CLICK, enccbsw)

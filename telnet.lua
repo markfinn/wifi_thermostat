@@ -25,7 +25,7 @@ function telnetserver(cb)
         node.output(s_output, 0)   -- re-direct output to function s_ouput.
     
         socket:on("receive", function(c, l)
-            table.insert(fifo, l)
+            table.insert(fifo, l) -- local echo
             node.input(l)           -- works like pcall(loadstring(l)) but support multiple separate line
         end)
         socket:on("disconnection", function(c)
